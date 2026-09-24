@@ -20,7 +20,7 @@ class BoardingScreen extends StatelessWidget {
           PageView(
             controller: context.read<OnBoardingCubit>().pageController,
             onPageChanged: (index) {
-              context.read<OnBoardingCubit>().goToNextPage(context);
+              context.read<OnBoardingCubit>().updatePageIndicator(index);
             },
             children: [
               OnBoardingPage(

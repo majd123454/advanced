@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+enum SnackBarType { success, error, warning, info }
+
 // Primary Colors
 const Color primaryRed = Color(0xffEF3F4C); // Bright Red
 const Color primaryGreen = Color(0xff2AC17E); // Vivid Green

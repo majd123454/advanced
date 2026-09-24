@@ -3,9 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../helper/constants/image_constants.dart';
 import '../helper/constants/text_strings.dart';
-import '../helper/extensions.dart';
 import '../models/success_model.dart';
-import '../routing/routes.dart';
 
 class EmailVerifiedSuccessfully extends StatelessWidget {
   const EmailVerifiedSuccessfully({super.key});

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:swb_advance/app/core/theming/app_colors.dart';
 
 import 'logger.dart';
 
@@ -61,66 +62,66 @@ class THelperFunctions {
     }
   }
 
-  // static void showSnackBar({
-  //   required BuildContext context,
-  //   required String message,
-  //   SnackBarType type = SnackBarType.info,
-  //   Duration duration = const Duration(milliseconds: 900),
-  // }) {
-  //   Color getColor() {
-  //     switch (type) {
-  //       case SnackBarType.success:
-  //         return success;
-  //       case SnackBarType.error:
-  //         return error;
-  //       case SnackBarType.warning:
-  //         return warning;
-  //       case SnackBarType.info:
-  //         return info;
-  //     }
-  //   }
+  static void showSnackBar({
+    required BuildContext context,
+    required String message,
+    SnackBarType type = SnackBarType.info,
+    Duration duration = const Duration(milliseconds: 900),
+  }) {
+    Color getColor() {
+      switch (type) {
+        case SnackBarType.success:
+          return success;
+        case SnackBarType.error:
+          return error;
+        case SnackBarType.warning:
+          return warning;
+        case SnackBarType.info:
+          return info;
+      }
+    }
 
-  //   IconData getIcon() {
-  //     switch (type) {
-  //       case SnackBarType.success:
-  //         return Icons.check_circle_outline;
-  //       case SnackBarType.error:
-  //         return Icons.error_outline;
-  //       case SnackBarType.warning:
-  //         return Icons.warning_amber_rounded;
-  //       case SnackBarType.info:
-  //         return Icons.info_outline;
-  //     }
-  //   }
+    IconData getIcon() {
+      switch (type) {
+        case SnackBarType.success:
+          return Icons.check_circle_outline;
+        case SnackBarType.error:
+          return Icons.error_outline;
+        case SnackBarType.warning:
+          return Icons.warning_amber_rounded;
+        case SnackBarType.info:
+          return Icons.info_outline;
+      }
+    }
 
-  // final snackBar = SnackBar(
-  //   content: Row(
-  //     children: [
-  //       Icon(getIcon(), color: darkText),
-  //       const SizedBox(width: 12),
-  //       Expanded(
-  //         child: Text(
-  //           message,
-  //           style: const TextStyle(
-  //             color: Colors.white,
-  //             fontSize: 14,
-  //             fontWeight: FontWeight.w500,
-  //           ),
-  //         ),
-  //       ),
-  //     ],
-  //   ),
-  //   backgroundColor: getColor(),
-  //   behavior: SnackBarBehavior.floating,
-  //   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-  //   duration: duration,
-  //   margin: const EdgeInsets.symmetric(vertical: 0, horizontal: 0),
-  // );
+    final snackBar = SnackBar(
+      content: Row(
+        children: [
+          Icon(getIcon(), color: darkText),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              message,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+      backgroundColor: getColor(),
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      duration: duration,
+      margin: const EdgeInsets.symmetric(vertical: 0, horizontal: 0),
+    );
 
-  //   ScaffoldMessenger.of(context)
-  //     ..hideCurrentSnackBar()
-  //     ..showSnackBar(snackBar);
-  // }
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(snackBar);
+  }
 
   static void hideKeyboard() {
     logger("Hiding keyboard");

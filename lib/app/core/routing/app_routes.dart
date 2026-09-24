@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:swb_advance/app/core/routing/routes.dart';
+import 'package:swb_advance/app/core/services/network/api_service.dart';
 import 'package:swb_advance/app/features/auth/auth_features/login/ui/login_screen.dart';
+import 'package:swb_advance/app/features/auth/data/repositories/auth_repo_impl.dart';
+import 'package:swb_advance/app/features/auth/logic/cubit/auth_cubit.dart';
+import 'package:swb_advance/app/features/auth/logic/usecase/login_usecase.dart';
 import 'package:swb_advance/app/features/boarding/logic/on_boarding_cubit.dart';
 import 'package:swb_advance/app/features/boarding/ui/boarding.dart';
 
@@ -16,7 +20,14 @@ class AppRoutes {
           ),
         );
       case Routes.login:
-        return MaterialPageRoute(builder: (_) => LoginScreen());
+        return MaterialPageRoute(
+          builder: (_) => BlocProvider(
+            create: (BuildContext context) => AuthCubit(
+              loginUseCase: LoginUseCase(AuthRepositoryImpl(ApiService())),
+            ),
+            child: LoginScreen(),
+          ),
+        );
 
       default:
         return MaterialPageRoute(builder: (_) => Text('No Route Found'));
