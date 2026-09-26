@@ -32,19 +32,4 @@ class ApiService {
     );
   }
 
-  Future<Response<Map<String, dynamic>>> signUp({
-    required String email,
-    required String password,
-    required String fullName,
-    String? phone,
-  }) {
-    return _dio.post<Map<String, dynamic>>(
-      '/auth/v1/signup',
-      data: {
-        'email': email,
-        'password': password,
-        'data': {'full_name': fullName, 'phone': phone},
-      },
-    );
-  }
 }

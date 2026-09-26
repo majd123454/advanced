@@ -45,6 +45,7 @@ class AuthRepositoryImpl implements AuthRepository {
 
   String _getDioErrorMessage(DioException error) {
     final data = error.response?.data;
+    logger(data.toString());
     if (data is Map<String, dynamic>) {
       return (data['error_description'] ?? data['msg'] ?? data['message'])
               as String? ??
