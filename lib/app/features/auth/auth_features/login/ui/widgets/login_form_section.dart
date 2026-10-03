@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:swb_advance/app/core/helper/extensions.dart';
+import 'package:swb_advance/app/core/routing/routes.dart';
 
 import '../../../../../../core/theming/app_colors.dart';
 import '../../../../../../core/helper/constants/text_strings.dart';
@@ -177,7 +179,7 @@ class _LoginFormSectionState extends State<LoginFormSection> {
                   width: double.infinity,
                   child: OutlinedButton(
                     onPressed: () {
-                      // context.pushNamed(Routes.signup);
+                      context.pushNamed(Routes.signup);
                     },
                     child: const Text(TTexts.createAccount),
                   ),

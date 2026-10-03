@@ -1,5 +1,8 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
+import 'package:swb_advance/app/core/services/auth/auth_tokens.dart';
+import 'package:swb_advance/app/core/services/auth/token_storage.dart';
 import 'package:swb_advance/app/core/services/network/api_service.dart';
 import 'package:swb_advance/app/core/helper/logger.dart';
 import 'package:swb_advance/app/features/auth/data/repositories/auth_repo.dart';
@@ -8,8 +11,9 @@ import '../models/user_model.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   final ApiService apiService;
+  final TokenStorage tokenStorage;
 
-  AuthRepositoryImpl(this.apiService);
+  AuthRepositoryImpl(this.apiService, this.tokenStorage);
 
   @override
   Future<Either<String, UserEntity>> signIn({
@@ -21,11 +25,31 @@ class AuthRepositoryImpl implements AuthRepository {
         email: email,
         password: password,
       );
+      final responseData = response.data;
+
+      if (kDebugMode) {
+        logger('LOGIN RESPONSE: $responseData', name: 'auth.login');
+        logger(
+          'ACCESS TOKEN: ${responseData?['access_token']}',
+          name: 'auth.login',
+        );
+        logger(
+          'REFRESH TOKEN: ${responseData?['refresh_token']}',
+          name: 'auth.login',
+        );
+      }
+
+      final accessToken = responseData?['access_token'];
       final userData = response.data?['user'];
 
+      if (accessToken is! String || accessToken.isEmpty) {
+        return const Left('لم يُرجع الخادم رمز الدخول');
+      }
       if (userData is! Map<String, dynamic>) {
         return const Left('فشل تسجيل الدخول');
       }
+
+      await tokenStorage.save(AuthTokens.fromJson(responseData!));
 
       return Right(
         UserEntity(
