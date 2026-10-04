@@ -7,4 +7,12 @@ abstract class AuthRepository {
     required String email,
     required String password,
   });
+
+  Future<Either<String, UserEntity>> signUp({
+    required String email,
+    required String password,
+    required String fullName,
+    required String phone,
+    required String address,
+  });
 }

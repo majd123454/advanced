@@ -1,6 +1,5 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:swb_advance/app/core/services/auth/auth_tokens.dart';
 import 'package:swb_advance/app/core/services/auth/token_storage.dart';
 import 'package:swb_advance/app/core/services/network/api_service.dart';
@@ -27,18 +26,6 @@ class AuthRepositoryImpl implements AuthRepository {
       );
       final responseData = response.data;
 
-      if (kDebugMode) {
-        logger('LOGIN RESPONSE: $responseData', name: 'auth.login');
-        logger(
-          'ACCESS TOKEN: ${responseData?['access_token']}',
-          name: 'auth.login',
-        );
-        logger(
-          'REFRESH TOKEN: ${responseData?['refresh_token']}',
-          name: 'auth.login',
-        );
-      }
-
       final accessToken = responseData?['access_token'];
       final userData = response.data?['user'];
 
@@ -47,6 +34,52 @@ class AuthRepositoryImpl implements AuthRepository {
       }
       if (userData is! Map<String, dynamic>) {
         return const Left('فشل تسجيل الدخول');
+      }
+
+      await tokenStorage.save(AuthTokens.fromJson(responseData!));
+
+      return Right(
+        UserEntity(
+          id: userData['id'] as String,
+          email: userData['email'] as String? ?? email,
+        ),
+      );
+    } on DioException catch (e) {
+      final message = _getDioErrorMessage(e);
+      logger(message);
+      return Left(_getAuthErrorMessage(message));
+    } catch (e) {
+      logger(e.toString());
+      return Left(e.toString());
+    }
+  }
+
+  @override
+  Future<Either<String, UserEntity>> signUp({
+    required String email,
+    required String password,
+    required String fullName,
+    required String phone,
+    required String address,
+  }) async {
+    try {
+      final response = await apiService.signUp(
+        email: email,
+        password: password,
+        fullName: fullName,
+        phone: phone,
+        address: address,
+      );
+      final responseData = response.data;
+
+      final accessToken = responseData?['access_token'];
+      final userData = responseData?['user'];
+
+      if (accessToken is! String || accessToken.isEmpty) {
+        return const Left('فشل إنشاء الحساب');
+      }
+      if (userData is! Map<String, dynamic>) {
+        return const Left('فشل إنشاء الحساب');
       }
 
       await tokenStorage.save(AuthTokens.fromJson(responseData!));

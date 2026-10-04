@@ -9,7 +9,7 @@ import 'package:swb_advance/app/features/auth/data/repositories/auth_repo_impl.d
 
 void main() {
   test(
-    'login saves tokens and sends access token on the next request',
+    'login refreshes an expired token and retries the original request',
     () async {
       final tokenStorage = MemoryTokenStorage();
       final apiService = ApiService(
@@ -19,13 +19,39 @@ void main() {
         loginPath: '/auth/login',
         useSupabaseGrantType: false,
       );
+      var profileRequestCount = 0;
       apiService.dio.httpClientAdapter = RecordingAdapter((options) {
         if (options.path == '/auth/login') {
           expect(options.headers['Authorization'], isNull);
           expect(options.headers['apikey'], 'public-api-key');
-        } else {
-          expect(options.headers['Authorization'], 'Bearer access-token');
+          return _jsonResponse(
+            '{"access_token":"access-token","refresh_token":"refresh-token","token_type":"Bearer","expires_in":3600,"user":{"id":"user-id","email":"person@example.com"}}',
+          );
         }
+
+        if (options.path == '/auth/v1/token') {
+          expect(options.extra['skipAuthToken'], isTrue);
+          expect(options.extra['skipAuthRefresh'], isTrue);
+          expect(options.data, {'refresh_token': 'refresh-token'});
+          return _jsonResponse(
+            '{"access_token":"refreshed-access-token","refresh_token":"rotated-refresh-token","token_type":"Bearer","expires_in":3600}',
+          );
+        }
+
+        if (options.path == '/profile') {
+          profileRequestCount++;
+          if (profileRequestCount == 1) {
+            expect(options.headers['Authorization'], 'Bearer access-token');
+            return _jsonResponse('{"message":"expired"}', statusCode: 401);
+          }
+          expect(
+            options.headers['Authorization'],
+            'Bearer refreshed-access-token',
+          );
+          return _jsonResponse('{}');
+        }
+
+        fail('Unexpected request path: ${options.path}');
       });
       final repository = AuthRepositoryImpl(apiService, tokenStorage);
 
@@ -40,8 +66,15 @@ void main() {
       );
 
       expect(response.statusCode, 200);
-      expect((await tokenStorage.read())?.accessToken, 'access-token');
-      expect((await tokenStorage.read())?.refreshToken, 'refresh-token');
+      expect(profileRequestCount, 2);
+      expect(
+        (await tokenStorage.read())?.accessToken,
+        'refreshed-access-token',
+      );
+      expect(
+        (await tokenStorage.read())?.refreshToken,
+        'rotated-refresh-token',
+      );
     },
   );
 }
@@ -64,7 +97,7 @@ class MemoryTokenStorage implements TokenStorage {
 }
 
 class RecordingAdapter implements HttpClientAdapter {
-  final void Function(RequestOptions options) onFetch;
+  final ResponseBody Function(RequestOptions options) onFetch;
 
   RecordingAdapter(this.onFetch);
 
@@ -74,18 +107,19 @@ class RecordingAdapter implements HttpClientAdapter {
     Stream<Uint8List>? requestStream,
     Future<void>? cancelFuture,
   ) async {
-    onFetch(options);
-    return ResponseBody.fromString(
-      options.path == '/auth/login'
-          ? '{"access_token":"access-token","refresh_token":"refresh-token","token_type":"Bearer","expires_in":3600,"user":{"id":"user-id","email":"person@example.com"}}'
-          : '{}',
-      200,
-      headers: {
-        Headers.contentTypeHeader: ['application/json'],
-      },
-    );
+    return onFetch(options);
   }
 
   @override
   void close({bool force = false}) {}
+}
+
+ResponseBody _jsonResponse(String body, {int statusCode = 200}) {
+  return ResponseBody.fromString(
+    body,
+    statusCode,
+    headers: {
+      Headers.contentTypeHeader: ['application/json'],
+    },
+  );
 }

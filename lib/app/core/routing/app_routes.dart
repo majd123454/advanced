@@ -4,9 +4,11 @@ import 'package:swb_advance/app/core/routing/routes.dart';
 import 'package:swb_advance/app/core/services/network/api_service.dart';
 import 'package:swb_advance/app/core/services/auth/secure_token_storage.dart';
 import 'package:swb_advance/app/features/auth/auth_features/login/ui/login_screen.dart';
+import 'package:swb_advance/app/features/auth/auth_features/signup/signup_screen.dart';
 import 'package:swb_advance/app/features/auth/data/repositories/auth_repo_impl.dart';
 import 'package:swb_advance/app/features/auth/logic/cubit/auth_cubit.dart';
 import 'package:swb_advance/app/features/auth/logic/usecase/login_usecase.dart';
+import 'package:swb_advance/app/features/auth/logic/usecase/signup_usecase.dart';
 import 'package:swb_advance/app/features/boarding/logic/on_boarding_cubit.dart';
 import 'package:swb_advance/app/features/boarding/ui/boarding.dart';
 
@@ -21,26 +23,31 @@ class AppRoutes {
           ),
         );
       case Routes.login:
+        return MaterialPageRoute(builder: (_) => _authScreen(LoginScreen()));
+      case Routes.signup:
         return MaterialPageRoute(
-          builder: (_) {
-            final tokenStorage = const SecureTokenStorage();
-            return BlocProvider(
-              create: (BuildContext context) => AuthCubit(
-                loginUseCase: LoginUseCase(
-                  AuthRepositoryImpl(
-                    ApiService.fromEnvironment(tokenStorage: tokenStorage),
-                    tokenStorage,
-                  ),
-                ),
-              ),
-              child: LoginScreen(),
-            );
-          },
+          builder: (_) => _authScreen(const SignUpView()),
         );
 
       default:
         return MaterialPageRoute(builder: (_) => Text('No Route Found'));
     }
+  }
+
+  Widget _authScreen(Widget child) {
+    final tokenStorage = const SecureTokenStorage();
+    final repository = AuthRepositoryImpl(
+      ApiService.fromEnvironment(tokenStorage: tokenStorage),
+      tokenStorage,
+    );
+
+    return BlocProvider(
+      create: (BuildContext context) => AuthCubit(
+        loginUseCase: LoginUseCase(repository),
+        signUpUseCase: SignUpUseCase(repository),
+      ),
+      child: child,
+    );
   }
 }
 

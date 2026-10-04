@@ -22,6 +22,8 @@ class ApiService {
       loginPath:
           dotenv.env['LOGIN_PATH'] ??
           (usesSupabaseDefaults ? '/auth/v1/token' : '/auth/login'),
+      refreshTokenPath:
+          dotenv.env['REFRESH_TOKEN_PATH'] ?? '/auth/v1/token',
       useSupabaseGrantType:
           dotenv.env['USE_SUPABASE_GRANT_TYPE']?.toLowerCase() != 'false',
     );
@@ -33,6 +35,7 @@ class ApiService {
     String? baseUrl,
     String? apiKey,
     this.loginPath = '/auth/v1/token',
+    this.refreshTokenPath = '/auth/v1/token',
     this.useSupabaseGrantType = true,
   }) : _dio =
            dio ??
@@ -43,12 +46,17 @@ class ApiService {
                useSupabaseGrantType: useSupabaseGrantType,
              ),
            ) {
-    _dio.interceptors.add(
-      AuthInterceptor(tokenStorage ?? const SecureTokenStorage()),
+    final authInterceptor = AuthInterceptor(
+      tokenStorage ?? const SecureTokenStorage(),
+      refreshTokenPath: refreshTokenPath,
+      useSupabaseGrantType: useSupabaseGrantType,
     );
+    authInterceptor.setDio(_dio);
+    _dio.interceptors.add(authInterceptor);
   }
 
   final String loginPath;
+  final String refreshTokenPath;
   final bool useSupabaseGrantType;
 
   static BaseOptions _baseOptions({
@@ -83,6 +91,40 @@ class ApiService {
       loginPath,
       queryParameters: useSupabaseGrantType ? {'grant_type': 'password'} : null,
       data: {'email': email, 'password': password},
+      options: Options(extra: {'skipAuthToken': true}),
+    );
+  }
+
+  Future<Response<Map<String, dynamic>>> signUp({
+    required String email,
+    required String password,
+    required String fullName,
+    required String phone,
+    required String address,
+  }) {
+    final signupPath = dotenv.env['SIGNUP_PATH'] ?? '/auth/v1/signup';
+    return _dio.post<Map<String, dynamic>>(
+      signupPath,
+      data: {
+        'email': email,
+        'password': password,
+        'user_metadata': {
+          'full_name': fullName,
+          'phone': phone,
+          'address': address,
+        }
+      },
+      options: Options(extra: {'skipAuthToken': true}),
+    );
+  }
+
+  Future<Response<Map<String, dynamic>>> refreshToken({
+    required String refreshToken,
+  }) {
+    return _dio.post<Map<String, dynamic>>(
+      refreshTokenPath,
+      queryParameters: useSupabaseGrantType ? {'grant_type': 'refresh_token'} : null,
+      data: {'refresh_token': refreshToken},
       options: Options(extra: {'skipAuthToken': true}),
     );
   }

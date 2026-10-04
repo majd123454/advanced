@@ -3,6 +3,7 @@ import 'package:swb_advance/app/features/auth/data/repositories/auth_repo.dart';
 import 'package:swb_advance/app/features/auth/data/repositories/auth_repo_impl.dart';
 import 'package:swb_advance/app/features/auth/logic/cubit/auth_cubit.dart';
 import 'package:swb_advance/app/features/auth/logic/usecase/login_usecase.dart';
+import 'package:swb_advance/app/features/auth/logic/usecase/signup_usecase.dart';
 
 import '../services/auth/secure_token_storage.dart';
 import '../services/auth/token_storage.dart';
@@ -20,10 +21,14 @@ Future<void> setupServiceLocator() async {
   sl.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(sl(), sl()),
   );
-  sl.registerFactory(() => AuthCubit(loginUseCase: sl()));
+  sl.registerFactory(() => AuthCubit(
+    loginUseCase: sl(),
+    signUpUseCase: sl(),
+  ));
 
-  // ==================== Login ====================
+  // ==================== Login & Sign Up ====================
   sl.registerLazySingleton(() => LoginUseCase(sl()));
+  sl.registerLazySingleton(() => SignUpUseCase(sl()));
 
   // ==================== ApiService ====================
   sl.registerLazySingleton<ApiService>(

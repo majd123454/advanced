@@ -47,19 +47,38 @@ class _SignUpFormSectionState extends State<SignUpFormSection> {
       return;
     }
 
-    // context.read<AuthCubit>().signUp(
-    //   email: _emailController.text.trim().toLowerCase(),
-    //   password: _passwordController.text.trim(),
-    //   fullName:
-    //       '${_firstNameController.text.trim()} ${_lastNameController.text.trim()}',
-    //   phone: _phoneController.text.trim(),
-    // );
+    context.read<AuthCubit>().signUp(
+      email: _emailController.text.trim().toLowerCase(),
+      password: _passwordController.text.trim(),
+      fullName:
+          '${_firstNameController.text.trim()} ${_lastNameController.text.trim()}',
+      phone: _phoneController.text.trim(),
+      address: _addressController.text.trim(),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocListener<AuthCubit, AuthState>(
-      listener: (context, state) {},
+      listener: (context, state) {
+        if (state is AuthError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.message),
+              backgroundColor: Colors.red,
+            ),
+          );
+        } else if (state is AuthAuthenticated) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('تم إنشاء الحساب بنجاح'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          // Navigate to home screen
+          // context.go('/home');
+        }
+      },
       child: Form(
         key: _formKey,
         child: Column(
