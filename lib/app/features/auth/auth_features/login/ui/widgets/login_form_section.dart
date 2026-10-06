@@ -51,25 +51,7 @@ class _LoginFormSectionState extends State<LoginFormSection> {
             type: SnackBarType.success,
           );
 
-          // context.pushReplacementNamed(Routes.navigation);
-
-          // THelperFunctions.navigateReplacementToScreen(
-          //   context,
-          //   MultiBlocProvider(
-          //     providers: [
-          //       // BlocProvider(
-          //       //   create: (context) =>
-          //       //       sl<NavigationMenuCubit>()..initializeScreensList(),
-          //       // ),
-          //       // BlocProvider(
-          //       //   create: (context) =>
-          //       //       sl<ShopCubit>()
-          //       //         ..getSortedProducts(sortBy: 'rating', sortType: "desc"),
-          //       // ),
-          //     ],
-          //     child: const NavigationMenu(),
-          //   ),
-          // );
+          context.pushReplacementNamed(Routes.navigation);
         } else if (state is AuthError) {
           THelperFunctions.showSnackBar(
             context: context,
@@ -94,7 +76,7 @@ class _LoginFormSectionState extends State<LoginFormSection> {
               children: [
                 TextFormField(
                   controller: _emailController,
-                  keyboardType: TextInputType.number,
+                  keyboardType: TextInputType.emailAddress,
                   decoration: const InputDecoration(
                     prefixIcon: Icon(Iconsax.direct_right),
                     labelText: TTexts.email,

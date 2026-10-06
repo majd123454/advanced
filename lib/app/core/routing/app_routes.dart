@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:swb_advance/app/core/di/service_locator.dart';
 import 'package:swb_advance/app/core/routing/routes.dart';
 import 'package:swb_advance/app/core/services/network/api_service.dart';
 import 'package:swb_advance/app/core/services/auth/secure_token_storage.dart';
@@ -11,6 +12,8 @@ import 'package:swb_advance/app/features/auth/logic/usecase/login_usecase.dart';
 import 'package:swb_advance/app/features/auth/logic/usecase/signup_usecase.dart';
 import 'package:swb_advance/app/features/boarding/logic/on_boarding_cubit.dart';
 import 'package:swb_advance/app/features/boarding/ui/boarding.dart';
+import 'package:swb_advance/app/features/navigation_bar/logic/cubit/navigation_cubit.dart';
+import 'package:swb_advance/app/features/navigation_bar/ui/navigation_bar.dart';
 
 class AppRoutes {
   Route? generateRoute(RouteSettings settings) {
@@ -27,6 +30,14 @@ class AppRoutes {
       case Routes.signup:
         return MaterialPageRoute(
           builder: (_) => _authScreen(const SignUpView()),
+        );
+      case Routes.navigation:
+        return MaterialPageRoute(
+          builder: (_) => BlocProvider(
+            create: (BuildContext context) =>
+                sl<NavigationCubit>()..initializeScreensList(),
+            child: NavigationButton(),
+          ),
         );
 
       default:
