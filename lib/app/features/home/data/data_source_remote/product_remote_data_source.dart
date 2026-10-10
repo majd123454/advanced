@@ -68,13 +68,6 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
           "limit": limit,
           "offset": offset,
         },
-        // options: Options(
-        //   headers: {
-        //     "apikey": supabaseKey,
-        //     "Authorization": "Bearer $supabaseKey",
-        //     "Content-Type": "application/json",
-        //   },
-        // ),
       );
 
       if (response.statusCode == 200) {

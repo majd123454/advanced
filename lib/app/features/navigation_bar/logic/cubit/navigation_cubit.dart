@@ -16,12 +16,11 @@ class NavigationCubit extends Cubit<NavigationState> {
         create: (BuildContext context) => sl<ProductCubit>()..getProducts(),
         child: const HomeView(),
       ),
-      // BlocProvider(
-      //   create: (_) => ChatCubit(repository: sl())
-      //     ..startListening()
-      //     ..getMessages(currentUserId),
-      //   child: const ChatScreen(),
-      // ),
+      Container(
+        height: 50,
+        width: 50,
+        color: Colors.red,
+      ), // Placeholder for ChatView
       // const WishlistView(),
       // const SettingsView(),
     ];
