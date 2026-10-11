@@ -37,6 +37,10 @@ The login response shape is:
 }
 ```
 
+Chat uses Supabase REST and requires `SUPPORT_USER_ID` in `.env`. Set it to the
+UUID of an existing support account in the configured Supabase project's
+`users` table.
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.

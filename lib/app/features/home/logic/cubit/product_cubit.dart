@@ -23,7 +23,7 @@ class ProductCubit extends Cubit<ProductState> {
   bool get hasMore => _hasMore;
 
   Future<void> getProducts({bool refresh = false}) async {
-    if (_isFetching) return;
+    if (isClosed || _isFetching) return;
 
     if (refresh) {
       _page = 0;
@@ -36,27 +36,31 @@ class ProductCubit extends Cubit<ProductState> {
 
     _isFetching = true;
 
-    final result = await getProductsListUsecase.call(
-      page: _page,
-      limit: _limit,
-    );
+    try {
+      final result = await getProductsListUsecase.call(
+        page: _page,
+        limit: _limit,
+      );
 
-    result.fold(
-      (error) {
-        emit(ProductError(error: error));
-      },
-      (newProducts) {
-        if (newProducts.length < _limit) {
-          _hasMore = false;
-        }
+      if (isClosed) return;
 
-        _products.addAll(newProducts);
-        _page++;
+      result.fold(
+        (error) {
+          emit(ProductError(error: error));
+        },
+        (newProducts) {
+          if (newProducts.length < _limit) {
+            _hasMore = false;
+          }
 
-        emit(ProductLoaded(products: List.from(_products)));
-      },
-    );
+          _products.addAll(newProducts);
+          _page++;
 
-    _isFetching = false;
+          emit(ProductLoaded(products: List.from(_products)));
+        },
+      );
+    } finally {
+      _isFetching = false;
+    }
   }
 }

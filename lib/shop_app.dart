@@ -3,10 +3,15 @@ import 'package:swb_advance/app/core/routing/app_routes.dart';
 import 'package:swb_advance/app/core/routing/routes.dart';
 import 'package:swb_advance/app/core/theming/theme.dart';
 
-// ignore: must_be_immutable
 class ShopApp extends StatelessWidget {
-  AppRoutes appRoutes;
-  ShopApp({super.key, required this.appRoutes});
+  final AppRoutes appRoutes;
+  final String initialRoute;
+
+  const ShopApp({
+    super.key,
+    required this.appRoutes,
+    this.initialRoute = Routes.boarding,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +19,7 @@ class ShopApp extends StatelessWidget {
       title: 'Shop App',
       theme: TAppTheme.lightTheme,
       darkTheme: TAppTheme.darkTheme,
-      initialRoute: Routes.boarding,
+      initialRoute: initialRoute,
       onGenerateRoute: appRoutes.generateRoute,
     );
   }

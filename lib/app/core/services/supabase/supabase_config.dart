@@ -14,6 +14,11 @@ class SupabaseConfig {
       dotenv.env['SUPABASE_ANON_KEY'] ??
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxza3dyaHVqd2hieGRlZmFzcHByIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU1ODA3MzIsImV4cCI6MjA4MTE1NjczMn0.1O_7OARrC4lSaFzyigEPes5Pn1j9s1aZE2l4ZwnSJCE';
 
+  static String? get supportUserId {
+    final userId = dotenv.env['SUPPORT_USER_ID']?.trim();
+    return userId == null || userId.isEmpty ? null : userId;
+  }
+
   // // Storage bucket names
   // static const String productImagesBucket = 'product-images';
   // static const String categoryImagesBucket = 'category-images';

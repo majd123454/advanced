@@ -35,17 +35,21 @@ class AppRoutes {
           ),
         );
       case Routes.navigation:
-        return MaterialPageRoute(
-          builder: (_) => BlocProvider(
-            create: (BuildContext context) =>
-                sl<NavigationCubit>()..initializeScreensList(),
-            child: NavigationButton(),
-          ),
-        );
+        return _navigationRoute();
 
       default:
         return MaterialPageRoute(builder: (_) => Text('No Route Found'));
     }
+  }
+
+  Route _navigationRoute() {
+    return MaterialPageRoute(
+      builder: (_) => BlocProvider(
+        create: (BuildContext context) =>
+            sl<NavigationCubit>()..initializeScreensList(),
+        child: NavigationButton(),
+      ),
+    );
   }
 }
 

@@ -8,6 +8,56 @@ import 'package:swb_advance/app/core/services/network/api_service.dart';
 import 'package:swb_advance/app/features/auth/data/repositories/auth_repo_impl.dart';
 
 void main() {
+  test('refreshes an expired Supabase JWT returned as 403 and retries', () async {
+    final tokenStorage = MemoryTokenStorage();
+    await tokenStorage.save(
+      const AuthTokens(
+        accessToken: 'expired-access-token',
+        refreshToken: 'refresh-token',
+      ),
+    );
+    final apiService = ApiService(
+      tokenStorage: tokenStorage,
+      baseUrl: 'https://supabase.test',
+    );
+    var profileRequestCount = 0;
+
+    apiService.dio.httpClientAdapter = RecordingAdapter((options) {
+      if (options.path == '/auth/v1/token') {
+        expect(options.queryParameters, {'grant_type': 'refresh_token'});
+        expect(options.data, {'refresh_token': 'refresh-token'});
+        return _jsonResponse(
+          '{"access_token":"fresh-access-token","refresh_token":"rotated-refresh-token","token_type":"Bearer","expires_in":3600}',
+        );
+      }
+
+      if (options.path == '/profile') {
+        profileRequestCount++;
+        if (profileRequestCount == 1) {
+          expect(
+            options.headers['Authorization'],
+            'Bearer expired-access-token',
+          );
+          return _jsonResponse(
+            '{"error_code":"bad_jwt","msg":"invalid JWT: token is expired"}',
+            statusCode: 403,
+          );
+        }
+        expect(options.headers['Authorization'], 'Bearer fresh-access-token');
+        return _jsonResponse('{}');
+      }
+
+      fail('Unexpected request path: ${options.path}');
+    });
+
+    final response = await apiService.dio.get<Map<String, dynamic>>('/profile');
+
+    expect(response.statusCode, 200);
+    expect(profileRequestCount, 2);
+    expect((await tokenStorage.read())?.accessToken, 'fresh-access-token');
+    expect((await tokenStorage.read())?.refreshToken, 'rotated-refresh-token');
+  });
+
   test(
     'login refreshes an expired token and retries the original request',
     () async {

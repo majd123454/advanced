@@ -1,5 +1,3 @@
-const String SUPPORT_USER_ID = '6ff54170-2175-43e9-aef5-f3dc8ca38f7e';
-
 class ApiConstants {
   static const String dummyBaseUrl = 'https://dummyjson.com/products';
 

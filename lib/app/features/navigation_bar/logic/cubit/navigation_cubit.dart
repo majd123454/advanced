@@ -1,4 +1,7 @@
 import 'package:swb_advance/app/core/di/service_locator.dart';
+import 'package:swb_advance/app/core/services/supabase/supabase_config.dart';
+import 'package:swb_advance/app/features/chat/logic/cubit/chat_cubit.dart';
+import 'package:swb_advance/app/features/chat/ui/chat_screen.dart';
 import 'package:swb_advance/app/features/home/logic/cubit/product_cubit.dart';
 import 'package:swb_advance/app/features/home/ui/home_screen.dart';
 import 'package:swb_advance/app/features/navigation_bar/logic/cubit/navigation_state.dart';
@@ -11,16 +14,19 @@ class NavigationCubit extends Cubit<NavigationState> {
   late final List<Widget> screens;
 
   void initializeScreensList() {
+    final supportUserId = SupabaseConfig.supportUserId;
+
     screens = [
       BlocProvider(
         create: (BuildContext context) => sl<ProductCubit>()..getProducts(),
         child: const HomeView(),
       ),
-      Container(
-        height: 50,
-        width: 50,
-        color: Colors.red,
-      ), // Placeholder for ChatView
+      BlocProvider(
+        create: (_) => sl<ChatCubit>()
+          ..startListening()
+          ..getMessages(supportUserId ?? ''),
+        child: const ChatScreen(),
+      ),
       // const WishlistView(),
       // const SettingsView(),
     ];

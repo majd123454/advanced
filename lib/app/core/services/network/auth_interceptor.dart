@@ -43,8 +43,9 @@ class AuthInterceptor extends Interceptor {
     final requestOptions = err.requestOptions;
     final alreadyRetried = requestOptions.extra['retriedAfterRefresh'] == true;
     final skipRefresh = requestOptions.extra['skipAuthRefresh'] == true;
+    final isExpiredSupabaseJwt = _isExpiredSupabaseJwt(err);
 
-    if (err.response?.statusCode != 401 ||
+    if ((err.response?.statusCode != 401 && !isExpiredSupabaseJwt) ||
         _dio == null ||
         alreadyRetried ||
         skipRefresh) {
@@ -102,5 +103,14 @@ class AuthInterceptor extends Interceptor {
       await tokenStorage.clear();
       handler.next(err);
     }
+  }
+
+  bool _isExpiredSupabaseJwt(DioException error) {
+    final data = error.response?.data;
+    if (error.response?.statusCode != 403 || data is! Map) return false;
+
+    final message = (data['msg'] ?? data['message'] ?? '').toString();
+    return data['error_code'] == 'bad_jwt' &&
+        message.toLowerCase().contains('token is expired');
   }
 }
