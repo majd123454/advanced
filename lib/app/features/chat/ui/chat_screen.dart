@@ -51,7 +51,6 @@ class _ChatScreenState extends State<ChatScreen> {
               return const Center(child: CircularProgressIndicator());
             }
             if (state is ChatError) {
-              logger(state.message);
               return Center(child: Text(state.message));
             }
             if (state is ChatLoaded) {

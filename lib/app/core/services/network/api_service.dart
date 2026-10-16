@@ -1,14 +1,13 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:swb_advance/app/core/services/auth/secure_token_storage.dart';
 import 'package:swb_advance/app/core/services/auth/token_storage.dart';
 import 'package:swb_advance/app/core/services/supabase/supabase_config.dart';
+import 'package:swb_advance/app/core/services/supabase/supabase_service.dart';
 import 'package:swb_advance/app/core/services/supabase/supabase_table.dart';
-import 'package:swb_advance/app/core/helper/logger.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'auth_interceptor.dart';
 
@@ -155,118 +154,32 @@ class ApiService {
   }
 
   Stream<Map<String, dynamic>> watchChatMessages() async* {
-    final baseUri = Uri.parse(SupabaseConfig.supabaseUrl);
-    final socketUri = baseUri.replace(
-      scheme: baseUri.scheme == 'https' ? 'wss' : 'ws',
-      path: '/realtime/v1/websocket',
-      queryParameters: {
-        'apikey': SupabaseConfig.supabaseAnonKey,
-        'vsn': '1.0.0',
-      },
-    );
-    final topic = 'realtime:public:${SupabaseTables.chatMessages}';
+    // Refresh an expired token before starting the Realtime subscription.
+    await getSupabaseCurrentUser();
+    final tokens = await _tokenStorage.read();
+    if (tokens == null) {
+      throw StateError('No authenticated Supabase session is available');
+    }
 
-    while (true) {
-      WebSocketChannel? channel;
-      Timer? heartbeat;
+    final client = SupabaseService.instance.client;
+    await client.realtime.setAuth(tokens.accessToken);
 
-      try {
-        // This REST request refreshes an expired access token through the auth interceptor.
-        await getSupabaseCurrentUser();
-        final tokens = await _tokenStorage.read();
-        if (tokens == null) {
-          throw StateError('No authenticated Supabase session is available');
-        }
+    final messages = StreamController<Map<String, dynamic>>();
+    final channel = client
+        .channel('public:${SupabaseTables.chatMessages}')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.insert,
+          schema: 'public',
+          table: SupabaseTables.chatMessages,
+          callback: (payload) => messages.add(payload.newRecord),
+        )
+        .subscribe();
 
-        channel = WebSocketChannel.connect(socketUri);
-        await channel.ready.timeout(const Duration(seconds: 15));
-        logger(
-          'Supabase Realtime WebSocket connected; joining $topic',
-          name: 'ChatRealtime',
-        );
-        channel.sink.add(
-          jsonEncode({
-            'topic': topic,
-            'event': 'phx_join',
-            'payload': {
-              'config': {
-                'broadcast': {'ack': false, 'self': false},
-                'presence': {'key': ''},
-                'postgres_changes': [
-                  {
-                    'event': 'INSERT',
-                    'schema': 'public',
-                    'table': SupabaseTables.chatMessages,
-                  },
-                ],
-                'private': false,
-              },
-              'access_token': tokens.accessToken,
-            },
-            'ref': '1',
-            'join_ref': '1',
-          }),
-        );
-
-        var heartbeatRef = 1;
-        final activeChannel = channel;
-        heartbeat = Timer.periodic(const Duration(seconds: 25), (_) {
-          heartbeatRef++;
-          activeChannel.sink.add(
-            jsonEncode({
-              'topic': 'phoenix',
-              'event': 'heartbeat',
-              'payload': <String, dynamic>{},
-              'ref': '$heartbeatRef',
-            }),
-          );
-        });
-
-        await for (final rawMessage in channel.stream) {
-          if (rawMessage is! String) continue;
-          final decoded = jsonDecode(rawMessage);
-          if (decoded is! Map) continue;
-
-          final event = decoded['event'];
-          final payload = decoded['payload'];
-          if (event == 'phx_reply' && decoded['topic'] == topic) {
-            if (payload is Map && payload['status'] == 'ok') {
-              logger(
-                'Supabase Realtime subscription accepted for $topic',
-                name: 'ChatRealtime',
-              );
-            } else if (payload is Map && payload['status'] == 'error') {
-              throw StateError('Supabase Realtime join failed: $payload');
-            }
-          }
-          if (event != 'postgres_changes' || payload is! Map) continue;
-
-          final change = payload['data'];
-          if (change is! Map || change['type'] != 'INSERT') continue;
-          final record = change['record'];
-          if (record is Map) {
-            logger(
-              'Supabase Realtime INSERT received: '
-              'id=${record['id']}, sender=${record['sender_id']}, '
-              'receiver=${record['receiver_id']}',
-              name: 'ChatRealtime',
-            );
-            yield Map<String, dynamic>.from(record);
-          }
-        }
-      } catch (error, stackTrace) {
-        logger(
-          'Supabase Realtime chat disconnected; retrying: $error',
-          name: 'ChatRealtime',
-          error: error,
-          stackTrace: stackTrace,
-        );
-      } finally {
-        heartbeat?.cancel();
-        await channel?.sink.close();
-      }
-
-      await Future<void>.delayed(const Duration(seconds: 3));
+    try {
+      yield* messages.stream;
+    } finally {
+      await channel.unsubscribe();
+      await messages.close();
     }
   }
 

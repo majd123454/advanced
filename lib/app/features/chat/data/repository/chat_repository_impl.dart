@@ -12,24 +12,6 @@ class ChatRepositoryImpl implements ChatRepository {
 
   ChatRepositoryImpl({required this.apiService});
 
-  Map<String, dynamic> _extractPayload(dynamic responseData) {
-    if (responseData is Map<String, dynamic>) {
-      return responseData;
-    }
-    if (responseData is Map) {
-      return Map<String, dynamic>.from(responseData);
-    }
-    return {'data': responseData};
-  }
-
-  List<dynamic> _extractListPayload(dynamic responseData) {
-    final payload = _extractPayload(responseData);
-    final source =
-        payload['data'] ?? payload['messages'] ?? payload['result'] ?? [];
-    if (source is List) return source;
-    return [];
-  }
-
   String _getErrorMessage(DioException error, String fallback) {
     final data = error.response?.data;
     if (data is Map) {
@@ -87,8 +69,7 @@ class ChatRepositoryImpl implements ChatRepository {
         limit: limit,
       );
 
-      final rows = _extractListPayload(response.data);
-      final messages = rows
+      final messages = (response.data as List)
           .map(
             (item) =>
                 ChatMessageModel.fromJson(Map<String, dynamic>.from(item)),
@@ -127,9 +108,7 @@ class ChatRepositoryImpl implements ChatRepository {
         messageType: messageType.name,
       );
 
-      final payload = _extractPayload(response.data);
-      final data = payload['data'] ?? payload['message'] ?? payload;
-      final messageData = data is List && data.isNotEmpty ? data.first : data;
+      final messageData = (response.data as List).first;
       final message = ChatMessageModel.fromJson(
         Map<String, dynamic>.from(messageData),
       );

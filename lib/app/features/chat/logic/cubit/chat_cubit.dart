@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 import 'package:swb_advance/app/core/helper/logger.dart';
 import 'package:swb_advance/app/features/chat/data/models/chat_message_entity.dart';
 import 'package:swb_advance/app/features/chat/logic/cubit/chat_state.dart';
@@ -31,8 +32,10 @@ class ChatCubit extends Cubit<ChatState> {
 
   void startListening() {
     _messagesSubscription?.cancel();
+    log("kkk");
     _messagesSubscription = watchChatMessagesUseCase().listen(
       (message) {
+        log(message.toJson().toString());
         if (isClosed) return;
         final otherUserId = _currentOtherUserId;
         if (otherUserId == null ||
@@ -104,11 +107,7 @@ class ChatCubit extends Cubit<ChatState> {
       // repository returns newest->oldest; convert to oldest->newest for UI
       final incoming = messages.reversed.toList();
 
-      if (_currentPage == 0) {
-        _messages = _mergeMessages(_messages, incoming);
-      } else {
-        _messages = _mergeMessages(_messages, incoming);
-      }
+      _messages = _mergeMessages(_messages, incoming);
 
       _currentPage++;
       emit(

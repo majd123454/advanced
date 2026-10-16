@@ -27,7 +27,6 @@ class ChatMessageEntity extends Equatable {
     this.senderAvatar,
   });
 
-  /// 👤 هل الرسالة من المستخدم الحالي؟
   bool isFromUser(String userId) => senderId == userId;
 
   /// 🔁 Supabase → Entity

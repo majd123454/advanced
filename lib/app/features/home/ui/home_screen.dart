@@ -251,7 +251,7 @@ class _HomeViewState extends State<HomeView> {
                 else
                   const SliverToBoxAdapter(child: SizedBox()),
 
-                /// 🔹 لودينغ تحت (لما يحمل صفحة جديدة)
+                
                 SliverToBoxAdapter(
                   child: BlocBuilder<ProductCubit, ProductState>(
                     builder: (context, state) {
