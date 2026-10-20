@@ -1,3 +1,8 @@
+plugins {
+    // الإضافات الموجودة عندك خليها متل ما هي
+
+    id("com.google.gms.google-services") version "4.5.0" apply false
+}
 allprojects {
     repositories {
         google()

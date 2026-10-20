@@ -1,4 +1,3 @@
-import 'package:swb_advance/app/core/helper/logger.dart';
 import 'package:swb_advance/app/features/chat/logic/cubit/chat_cubit.dart';
 import 'package:swb_advance/app/features/chat/logic/cubit/chat_state.dart';
 import 'package:swb_advance/app/features/chat/ui/widgets/message_bubble.dart';
