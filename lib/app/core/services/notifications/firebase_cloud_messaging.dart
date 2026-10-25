@@ -4,7 +4,6 @@ import 'dart:math' as math;
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:just_audio/just_audio.dart';
 import 'package:swb_advance/app/core/helper/constants/enum.dart';
 import 'package:swb_advance/app/core/helper/logger.dart';
 import 'package:swb_advance/app/core/theming/app_colors.dart';
@@ -138,8 +137,6 @@ class NotificationService {
       logger(message.data.toString(), name: "onMessage data");
 
       try {
-        final AudioPlayer player = AudioPlayer();
-
         if (message.notification != null ||
             (message.data["title"] != null && message.data["body"] != null)) {
           String title =
@@ -157,12 +154,6 @@ class NotificationService {
             bigPicture: message.data["image_url"] ?? message.data["image"],
             payload: convertMap(message.data),
           );
-
-          if (message.data.toString().contains("arriveToMeetingPoint")) {
-            player.setAsset('assets/audios/car-horn-taxi.mp3').then((value) {
-              player.play();
-            });
-          }
 
           Vibration.vibrate(duration: 100);
         }

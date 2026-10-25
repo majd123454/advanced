@@ -77,6 +77,10 @@ class ProductModel extends ProductEntity {
       'is_featured': isFeatured,
       'is_active': isActive,
       'attributes': attributes,
+      'created_at': createdAt?.toIso8601String(),
+      'updated_at': updatedAt?.toIso8601String(),
+      'categories': categoryName == null ? null : {'name': categoryName},
+      'brands': brandName == null ? null : {'name': brandName},
     };
   }
 

@@ -7,6 +7,8 @@ abstract class ProductRepository {
     int page = 0,
     int limit = 10,
   });
+  Future<List<ProductEntity>> getCachedProducts();
+  Future<void> cacheProducts(List<ProductEntity> products);
   Future<Either<TExceptions, ProductEntity>> getProductById({
     required int productId,
   });

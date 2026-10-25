@@ -53,6 +53,7 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
     }
   }
 
+  @override
   Future<Either<TExceptions, List<ProductModel>>> getProductsList({
     int page = 0,
     int limit = 10,
@@ -115,11 +116,19 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
     String? search,
   }) async {
     try {
-      var response = await dio.get(
-        ApiConstants.getDummyProductsBySearch(search: search),
+      final query = search?.trim() ?? '';
+      if (query.isEmpty) return const Right(<ProductModel>[]);
+
+      final response = await dio.get(
+        '$supabaseUrl/rest/v1/products',
+        queryParameters: {
+          'select': '*',
+          'name': 'ilike.*$query*',
+          'order': 'id.asc',
+        },
       );
       if (response.statusCode == 200) {
-        var products = (response.data['products'] as List)
+        final products = (response.data as List)
             .map((e) => ProductModel.fromJson(e))
             .toList();
         return Right(products);

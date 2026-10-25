@@ -2,6 +2,8 @@ import 'package:swb_advance/app/core/di/service_locator.dart';
 import 'package:swb_advance/app/core/services/supabase/supabase_config.dart';
 import 'package:swb_advance/app/features/chat/logic/cubit/chat_cubit.dart';
 import 'package:swb_advance/app/features/chat/ui/chat_screen.dart';
+import 'package:swb_advance/app/features/favourite/logic/cubit/favourite_cubit.dart';
+import 'package:swb_advance/app/features/favourite/ui/favourite_screen.dart';
 import 'package:swb_advance/app/features/home/logic/cubit/product_cubit.dart';
 import 'package:swb_advance/app/features/home/ui/home_screen.dart';
 import 'package:swb_advance/app/features/navigation_bar/logic/cubit/navigation_state.dart';
@@ -27,8 +29,10 @@ class NavigationCubit extends Cubit<NavigationState> {
           ..getMessages(supportUserId ?? ''),
         child: const ChatScreen(),
       ),
-      // const WishlistView(),
-      // const SettingsView(),
+      BlocProvider(
+        create: (_) => sl<FavouriteCubit>()..getFavourites(),
+        child: const FavouriteScreen(),
+      ),
     ];
   }
 

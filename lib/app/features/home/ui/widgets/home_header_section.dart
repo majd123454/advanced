@@ -1,14 +1,18 @@
 import 'package:swb_advance/app/core/helper/constants/sizes.dart';
 import 'package:swb_advance/app/core/helper/constants/text_strings.dart';
 import 'package:swb_advance/app/core/theming/app_colors.dart';
+import 'package:swb_advance/app/core/di/service_locator.dart';
 import 'package:swb_advance/app/core/widgets/search_container.dart';
 import 'package:swb_advance/app/core/widgets/section_heading.dart';
 import 'package:swb_advance/app/features/home/data/models/search_container_view_model.dart';
 import 'package:swb_advance/app/features/home/data/models/section_heading_view_model.dart';
+import 'package:swb_advance/app/features/home/logic/cubit/product_cubit.dart';
+import 'package:swb_advance/app/features/home/ui/product_search_screen.dart';
 import 'package:swb_advance/app/features/home/ui/widgets/home_app_bar.dart';
 import 'package:swb_advance/app/features/home/ui/widgets/home_categories.dart';
 import 'package:swb_advance/app/features/home/ui/widgets/primary_header_container.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:iconsax/iconsax.dart';
 
 class HomeHeaderSection extends StatelessWidget {
@@ -26,6 +30,16 @@ class HomeHeaderSection extends StatelessWidget {
       title: TTexts.searchContainer,
       showBackground: true,
       showBorder: true,
+      onPressed: () {
+        Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) => BlocProvider(
+              create: (_) => sl<ProductCubit>(),
+              child: const ProductSearchScreen(),
+            ),
+          ),
+        );
+      },
     );
 
     return PrimaryHeaderContainer(

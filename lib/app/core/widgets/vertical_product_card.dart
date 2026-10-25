@@ -45,17 +45,23 @@ class VerticalProductCard extends StatelessWidget {
                 color: dark ? AppColors.dark : AppColors.light,
                 child: Stack(
                   children: [
-                    RoundedImage(
-                      roundedImageModel: RoundedImageModel(
-                        isNetworkImage: true,
-                        backgroundColor: dark
-                            ? AppColors.dark
-                            : AppColors.light,
-                        image: product.images.first,
-                        onTap: () {},
-                        applyImageRadius: true,
-                      ),
-                    ),
+                    if (product.images.isNotEmpty ||
+                        (product.thumbnail?.isNotEmpty ?? false))
+                      RoundedImage(
+                        roundedImageModel: RoundedImageModel(
+                          isNetworkImage: true,
+                          backgroundColor: dark
+                              ? AppColors.dark
+                              : AppColors.light,
+                          image: product.images.isNotEmpty
+                              ? product.images.first
+                              : product.thumbnail!,
+                          onTap: () {},
+                          applyImageRadius: true,
+                        ),
+                      )
+                    else
+                      const Center(child: Icon(Icons.image_not_supported)),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [

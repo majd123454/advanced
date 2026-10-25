@@ -12,10 +12,17 @@ import 'package:swb_advance/app/features/chat/logic/cubit/chat_cubit.dart';
 import 'package:swb_advance/app/features/chat/logic/use_cases/get_messages_usecase.dart';
 import 'package:swb_advance/app/features/chat/logic/use_cases/send_message_usecase.dart';
 import 'package:swb_advance/app/features/chat/logic/use_cases/watch_chat_messages_usecase.dart';
+import 'package:swb_advance/app/features/favourite/data/repositories/favourite_repository.dart';
+import 'package:swb_advance/app/features/favourite/data/repositories/favourite_repository_impl.dart';
+import 'package:swb_advance/app/features/favourite/data/data_source_remote/favourite_remote_data_source.dart';
+import 'package:swb_advance/app/features/favourite/logic/cubit/favourite_cubit.dart';
+import 'package:swb_advance/app/features/favourite/logic/use_cases/get_favourites_usecase.dart';
 import 'package:swb_advance/app/features/home/data/data_source_remote/product_remote_data_source.dart';
+import 'package:swb_advance/app/features/home/data/data_source_local/product_local_data_source.dart';
 import 'package:swb_advance/app/features/home/data/repositories/product_repository.dart';
 import 'package:swb_advance/app/features/home/data/repositories/product_repository_impl.dart';
 import 'package:swb_advance/app/features/home/logic/cubit/product_cubit.dart';
+import 'package:swb_advance/app/features/home/logic/use_cases/get_products_by_search_usecase.dart';
 import 'package:swb_advance/app/features/home/logic/use_cases/get_products_list_usecase.dart';
 import 'package:swb_advance/app/features/navigation_bar/logic/cubit/navigation_cubit.dart';
 
@@ -56,19 +63,38 @@ Future<void> setupServiceLocator() async {
   sl.registerSingleton<ProductRemoteDataSource>(
     ProductRemoteDataSourceImpl(dio: sl()),
   );
+  sl.registerSingleton<ProductLocalDataSource>(ProductLocalDataSourceImpl());
 
   // ==================== Products ====================
   sl.registerLazySingleton<ProductRepository>(
-    () => ProductRepositoryImpl(remoteDataSource: sl()),
+    () => ProductRepositoryImpl(remoteDataSource: sl(), localDataSource: sl()),
   );
 
   // Use Cases
   sl.registerLazySingleton(
     () => GetProductsListUsecase(productRepository: sl()),
   );
+  sl.registerLazySingleton(
+    () => GetProductsBySearchUsecase(productRepository: sl()),
+  );
 
   // Cubit
-  sl.registerFactory(() => ProductCubit(getProductsListUsecase: sl()));
+  sl.registerFactory(
+    () => ProductCubit(
+      getProductsListUsecase: sl(),
+      getProductsBySearchUsecase: sl(),
+    ),
+  );
+
+  // ==================== Favourites ====================
+  sl.registerLazySingleton<FavouriteRemoteDataSource>(
+    () => FavouriteRemoteDataSourceImpl(apiService: sl()),
+  );
+  sl.registerLazySingleton<FavouriteRepository>(
+    () => FavouriteRepositoryImpl(remoteDataSource: sl()),
+  );
+  sl.registerLazySingleton(() => GetFavouritesUseCase(sl()));
+  sl.registerFactory(() => FavouriteCubit(getFavouritesUseCase: sl()));
 
   // ==================== Chat ====================
   sl.registerLazySingleton<ChatRepository>(

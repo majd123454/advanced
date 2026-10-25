@@ -251,7 +251,6 @@ class _HomeViewState extends State<HomeView> {
                 else
                   const SliverToBoxAdapter(child: SizedBox()),
 
-                
                 SliverToBoxAdapter(
                   child: BlocBuilder<ProductCubit, ProductState>(
                     builder: (context, state) {

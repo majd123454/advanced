@@ -52,7 +52,6 @@ class _NavigationButtonState extends State<NavigationButton> {
                 icon: Icon(Iconsax.favorite_chart),
                 label: 'Favorites',
               ),
-              NavigationDestination(icon: Icon(Iconsax.user), label: 'Profile'),
             ],
           ),
           body: context.read<NavigationCubit>().getScreen(

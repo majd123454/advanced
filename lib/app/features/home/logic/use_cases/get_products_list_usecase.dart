@@ -13,4 +13,12 @@ class GetProductsListUsecase {
   }) async {
     return await productRepository.getProductsList(page: page, limit: limit);
   }
+
+  Future<List<ProductEntity>> getCachedProducts() {
+    return productRepository.getCachedProducts();
+  }
+
+  Future<void> cacheProducts(List<ProductEntity> products) {
+    return productRepository.cacheProducts(products);
+  }
 }

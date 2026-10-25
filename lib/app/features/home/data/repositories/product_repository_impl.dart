@@ -1,12 +1,18 @@
 import 'package:dartz/dartz.dart';
 import 'package:swb_advance/app/core/helper/exceptions/exceptions.dart';
+import 'package:swb_advance/app/features/home/data/data_source_local/product_local_data_source.dart';
 import 'package:swb_advance/app/features/home/data/data_source_remote/product_remote_data_source.dart';
 import 'package:swb_advance/app/features/home/data/models/product_entity.dart';
+import 'package:swb_advance/app/features/home/data/models/product_model.dart';
 import 'package:swb_advance/app/features/home/data/repositories/product_repository.dart';
 
 class ProductRepositoryImpl implements ProductRepository {
   final ProductRemoteDataSource remoteDataSource;
-  ProductRepositoryImpl({required this.remoteDataSource});
+  final ProductLocalDataSource localDataSource;
+  ProductRepositoryImpl({
+    required this.remoteDataSource,
+    required this.localDataSource,
+  });
 
   @override
   Future<Either<TExceptions, List<ProductEntity>>> getProductsByCategory({
@@ -23,6 +29,18 @@ class ProductRepositoryImpl implements ProductRepository {
     int limit = 10,
   }) async {
     return await remoteDataSource.getProductsList(page: page, limit: limit);
+  }
+
+  @override
+  Future<List<ProductEntity>> getCachedProducts() async {
+    return localDataSource.getCachedProducts();
+  }
+
+  @override
+  Future<void> cacheProducts(List<ProductEntity> products) async {
+    await localDataSource.cacheProducts(
+      products.map(ProductModel.fromEntity).toList(),
+    );
   }
 
   @override
